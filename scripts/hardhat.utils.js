@@ -68,13 +68,8 @@ async function revertSnapshot(snapshotId) {
 }
 
 async function deploy(contractName, constructorArgs = [], verbose = false, overrides = {}) {
-    let contract;
-    let factory = await hre.ethers.getContractFactory(contractName);
-    if (constructorArgs == []) {
-        contract = await factory.deploy(overrides);
-    } else {
-        contract = await factory.deploy(...constructorArgs, overrides);
-    }
+    const factory = await hre.ethers.getContractFactory(contractName);
+    const contract = await factory.deploy(...constructorArgs, overrides);
     await contract.deployed();
     if (verbose) console.log(`Deployed ${contractName} at ${contract.address}`);
     return contract;

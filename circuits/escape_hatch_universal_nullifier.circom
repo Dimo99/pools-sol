@@ -52,7 +52,7 @@ component main {
         contractCode,
         message
     ]
-} = ExcapeHatchUniversalNullifier(
+} = EscapeHatchUniversalNullifier(
     20,
     // keccak256("allowed") % p
     11954255677048767585730959529592939615262310191150853775895456173962480955685

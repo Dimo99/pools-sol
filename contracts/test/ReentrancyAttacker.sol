@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import "../interface/PrivacyPool.sol";
+import "../PrivacyPool.sol";
 
 contract ReentrancyAttacker {
     /*
@@ -11,15 +11,25 @@ contract ReentrancyAttacker {
         can test the ReentrancyGuard contract because the revert condition will be checked immediately,
         before the gas is expended in the logic of the function.
     */
+
     fallback() external payable {
-        IPrivacyPool(msg.sender).withdraw(
-            [uint256(0), 0, 0, 0, 0, 0, 0, 0],
-            0,
-            0,
-            0,
-            address(0),
-            address(0),
-            0
-        );
+        PrivacyPool.WithdrawalRequest memory withdrawRequest = PrivacyPool.WithdrawalRequest({
+            proof: PrivacyPool.WithdrawalProof({
+                accessType: PrivacyPool.AccessType.BLOCKLIST,
+                bitLength: 0,
+                subsetData: "0x00",
+                flatProof: [uint256(0), 0, 0, 0, 0, 0, 0, 0],
+                root: 0,
+                subsetRoot: 0,
+                nullifier: 0,
+                recipient: address(0),
+                refund: 0,
+                relayer: address(0),
+                fee: 0,
+                deadline: block.timestamp
+            }),
+            feeReceiver: address(0)
+        });
+        PrivacyPool(msg.sender).withdraw(withdrawRequest);
     }
 }

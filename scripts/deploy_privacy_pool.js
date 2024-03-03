@@ -4,10 +4,8 @@ const { ethers } = require("hardhat");
 const { deploy, deployBytes } = require("./hardhat.utils.js");
 const poseidonContracts = require("../poseidonContracts.json");
 
-const denominations = [
-    ethers.utils.parseEther("0.01"),
-    ethers.utils.parseEther("0.001"),
-];
+const nativeAddress = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+const nativeDenomination = ethers.utils.parseEther("10");
 
 async function main() {
     hre.ethers.provider.getNetwork().then(async ({ chainId }) => {
@@ -23,13 +21,12 @@ async function main() {
             );
         }
 
-        for (const denomination of denominations) {
-            await deploy(
-                "PrivacyPool",
-                [poseidonContracts[chainId], denomination],
-                true
-            );
-        }
+        console.log(`Deploying ${nativeAddress} PrivacyPool with ${nativeDenomination} denomination`)
+        await deploy(
+            "PrivacyPool",
+            [poseidonContracts[chainId], nativeAddress, nativeDenomination],
+            true
+        );
     });
 }
 

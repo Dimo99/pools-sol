@@ -1,3 +1,7 @@
+# Privacy-Pools
+
+Fork of `https://github.com/ameensol/privacy-pools` project.
+
 # Features
 
 -   Deposited funds cannot be locked or stolen (non-custodial and non-restrictive)
@@ -16,6 +20,7 @@ You can read more about privacy pools in [docs](./docs).
 -   [npm](https://www.npmjs.com/) / [yarn](https://yarnpkg.com/)
 -   [rust](https://www.rust-lang.org/tools/install) / [circom2](https://docs.circom.io/getting-started/installation/)
 -   [python3](https://www.python.org/downloads/)
+-   [snarkjs v0.6.9](https://www.npmjs.com/package/snarkjs/v/0.6.9)
 
 # Install and Test Locally
 Only tested on a UNIX-like OS (linux or mac).
@@ -23,7 +28,7 @@ Only tested on a UNIX-like OS (linux or mac).
 ## Clone the Repo
 ```sh
 $ git clone https://github.com/ameensol/privacy-pools
-$ cd privacy-pools
+$ cd pools-sol
 ```
 
 ## Install Dependencies
@@ -72,33 +77,7 @@ If you don't activate the python venv you can use:
 $ ./venv/bin/slither --hardhat-cache-directory=./build/cache --hardhat-artifacts-directory=./build/artifacts .
 ```
 
-# Working To Do List
-2. AccessList Lib
-    - Add compression
-    - Extend js unit tests
-    - NFT api: deploy, mint, upload to IPFS
-    - Define IPFS Metadata interface
-    - Deposit event listener + AccessList maintainer
-3. AccessList NFT Contract
-    - ERC721 NFT contract for storing access lists on chain
-    - Currently maintains blocknumber + treeType per subsetRoot
-    - Need to add chainId and contractAddress
-    - Optional to add asset and denomination
-    - Integrate Owner.sol
-    - Integrate an initial bootstrap list of sus addresses
-4. Interface and testnet deployment
-    - Simple UI
-    - Deposit and withdraw
-    - Simple subsetRoot table
-    - Testnet deployment
-    - Answer open questions
-        - Public registry of relayer IPs?
-        - Should it display the connected wallet's status (e.g. if its sanctioned)?
-        - Should it display any deposits that have been flagged by the list providers as being sus?
-        - Should it display a list of the user's deposits?
-        - Should it give an anonymity estimate based on number of new deposits?
-5. Relayer server
-    - Only accepts withdrawals from roots that are publicly posted in chosen NFT contracts
-    - Tracks the deposits and subsets internally
-    - Public registry of relayer IPs, permissionless listing? Since we want to make a static site, there should be some route for relayers to add themselves to the list without needing to update the site
-    - I can probably think of multiple ways to decentralize this but probably for the initial demo we should just have one and ignore unknown subset roots
+### envs
+```bash
+HARDHAT_NODE_LOGGING_ENABLED=1 # have the hardhat node print out rpc request info
+```

@@ -113,7 +113,9 @@ describe("withdraw_from_subset.circom (JS tests edition)", function () {
         );
         for (const path of paths) {
             try {
-                console.time(chalk.green(`    proof ${this.proofCounter}`));
+                const counter = this.proofCounter
+                this.proofCounter++
+                console.time(chalk.green(`    proof ${counter}`));
                 const deposit_tree = new MerkleTree({
                     hasher: poseidon,
                     leaves: this.commitments,
@@ -150,9 +152,7 @@ describe("withdraw_from_subset.circom (JS tests edition)", function () {
                     wasmFileName: WASM_FNAME,
                     zkeyFileName: ZKEY_FNAME
                 });
-                console.timeEnd(
-                    chalk.green(`    proof ${this.proofCounter++}`)
-                );
+                console.timeEnd(chalk.green(`    proof ${counter}`));
                 expect(
                     await verifyProof({
                         proof,
@@ -214,7 +214,9 @@ describe("withdraw_from_subset.circom (JS tests edition)", function () {
         );
         for (const path of paths) {
             try {
-                console.time(chalk.blue(`    proof ${this.proofCounter}`));
+                const count = this.proofCounter
+                this.proofCounter++
+                console.time(chalk.blue(`    proof ${count}`));
                 const { pathElements: mainProof, pathRoot: root } =
                     await this.deposit_tree.path(path);
                 const { pathElements: subsetProof, pathRoot: subsetRoot } =
@@ -237,7 +239,7 @@ describe("withdraw_from_subset.circom (JS tests edition)", function () {
                     wasmFileName: WASM_FNAME,
                     zkeyFileName: ZKEY_FNAME
                 });
-                console.timeEnd(chalk.blue(`    proof ${this.proofCounter++}`));
+                console.timeEnd(chalk.blue(`    proof ${count}`));
                 expect(
                     await verifyProof({
                         proof,
@@ -251,5 +253,4 @@ describe("withdraw_from_subset.circom (JS tests edition)", function () {
         }
     }).timeout(ZKP_TEST_TIMEOUT);
 
-    after(() => process.exit());
 });

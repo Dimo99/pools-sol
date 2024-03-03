@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.16;
+pragma solidity 0.8.17;
 
 import "./ProofLib.sol";
 
@@ -12,7 +12,7 @@ contract WithdrawFromSubsetVerifier {
         pure
         returns (ProofLib.VerifyingKey memory vk)
     {
-// VERIFYING KEY
+// VERIFYING_KEY
     }
 
     function _verifyWithdrawFromSubsetProof(
@@ -29,7 +29,7 @@ contract WithdrawFromSubsetVerifier {
             nullifier >= ProofLib.SNARK_SCALAR_FIELD ||
             assetMetadata >= ProofLib.SNARK_SCALAR_FIELD ||
             withdrawMetadata >= ProofLib.SNARK_SCALAR_FIELD
-        ) revert ProofLib.GteSnarkScalarField();
+        ) revert ProofLib__GteSnarkScalarField();
 
         ProofLib.Proof memory proof;
         proof.a = ProofLib.G1Point(flatProof[0], flatProof[1]);

@@ -1,58 +1,47 @@
-require("@nomicfoundation/hardhat-chai-matchers");
-require("hardhat-gas-reporter");
-require("dotenv").config();
+require('dotenv').config()
+const { ethers } = require('ethers')
 
-// require('hardhat-storage-layout');
+require('@nomicfoundation/hardhat-chai-matchers')
+require('hardhat-gas-reporter')
+require('@nomiclabs/hardhat-etherscan')
+require('solidity-coverage')
+require('@typechain/hardhat')
 
 const {
-    OP_GOERLI_RPC,
-    GOERLI_KEY,
-    GOERLI_RPC,
-    OP_GOERLI_KEY,
-    OP_KEY,
-    ETH_KEY,
-    ETH_RPC,
-    SEPOLIA_RPC
-} = process.env;
+    ETHERSCAN_API,
+    HARDHAT_NODE_LOGGING_ENABLED,
+    PRIVATE_KEY,
+} = process.env
+
+Error.stackTraceLimit = Infinity
 
 module.exports = {
-    defaultNetwork: "hardhat",
+    defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
-            loggingEnabled: true,
-            gasPrice: 1
+            loggingEnabled: HARDHAT_NODE_LOGGING_ENABLED === 'true' ? true : false,
+            gasPrice: 875000000,
+            accounts: {
+                accountsBalance: ethers.utils.parseEther((100_000_000_000).toString()).toString(),
+                count: 20,
+            },
         },
         sepolia: {
-            accounts: [GOERLI_KEY],
-            url: SEPOLIA_RPC
-        },
-        // op: {
-        //     accounts: [OP_KEY],
-        //     url: OP_RPC
-        // },
-        op_goerli: {
-            accounts: [OP_GOERLI_KEY],
-            url: OP_GOERLI_RPC
-        },
-        // eth: {
-        //     accounts: [ETH_KEY],
-        //     url: ETH_RPC
-        // },
-        goerli: {
-            accounts: [GOERLI_KEY],
-            url: GOERLI_RPC
+            accounts: [PRIVATE_KEY || ethers.constants.HashZero],
+            url: 'https://ethereum-sepolia.publicnode.com'
         }
     },
-    paths: {
-        sources: "./contracts",
-        cache: "./build/cache",
-        artifacts: "./build/artifacts",
-        tests: "./test"
+    typechain: {
+        outDir: 'artifacts/types',
+        target: 'ethers-v6',
+    },
+    mocha: {
+      timeout: 120_000,
     },
     solidity: {
         compilers: [
             {
-                version: "0.8.17",
+                version: '0.8.17',
                 settings: {
                     optimizer: {
                         enabled: true,
@@ -61,5 +50,25 @@ module.exports = {
                 }
             }
         ]
-    }
-};
+    },
+    gasReporter: {
+        currency: 'USD',
+        token: 'ETH',
+        enabled: true,
+        gasPrice: 100,
+    },
+    etherscan: {
+        apiKey: ETHERSCAN_API,
+        customChains: [
+            {
+                network: 'sepolia',
+                chainId: 11155111,
+                urls: {
+                    apiURL: 'https://sepolia.etherscan.io/api',
+                    browserURL: 'https://sepolia.etherscan.io',
+                },
+            },
+        ],
+    },
+}
+

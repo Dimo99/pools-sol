@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import "./interface/Poseidon.sol";
+import "./interface/IPoseidon.sol";
 
 error IncrementalMerkleTree__MerkleTreeCapacity();
 
@@ -14,7 +14,7 @@ contract IncrementalMerkleTree {
     // length of roots history
     uint256 public constant ROOTS_CAPACITY = 30;
     // index of next leaf to be inserted
-    uint256 public currentLeafIndex;
+    uint256 public currentLeafIndex = 0;
     // filled subtrees cached to reconstruct the root
     mapping(uint256 => bytes32) public filledSubtrees;
     // historic roots (only holds up to ROOTS_CAPACITY roots)
@@ -60,14 +60,15 @@ contract IncrementalMerkleTree {
     function isKnownRoot(bytes32 root) public view returns (bool) {
         if (root == 0) return false;
         uint256 checkIndex = currentLeafIndex % ROOTS_CAPACITY;
-        for (uint256 i = 0; i < ROOTS_CAPACITY; ) {
+        uint256 i;
+        do {
             if (root == roots[checkIndex]) return true;
             if (checkIndex == 0) checkIndex = ROOTS_CAPACITY;
             unchecked {
                 ++i;
                 --checkIndex;
             }
-        }
+        } while (i < ROOTS_CAPACITY);
         return false;
     }
 

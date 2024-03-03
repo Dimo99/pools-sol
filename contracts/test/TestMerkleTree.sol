@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.17;
 
-import "../interface/Poseidon.sol";
+import "../interface/IPoseidon.sol";
 
 contract TestMerkleTree {
     error IndexOutOfRange();
