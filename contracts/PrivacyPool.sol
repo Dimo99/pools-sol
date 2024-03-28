@@ -80,7 +80,7 @@ contract PrivacyPool is
     mapping(bytes32 => bool) public nullifiers;
     mapping(bytes32 => bool) public commitments;
 
-    constructor(address poseidon, address _asset, uint256 _denomination) ReentrancyGuard() IncrementalMerkleTree(poseidon) {
+    constructor(address poseidon, address _asset, uint256 _denomination) IncrementalMerkleTree(poseidon) {
         if (poseidon == address(0)) {
             revert PrivacyPool__ZeroAddress();
         }
@@ -102,10 +102,11 @@ contract PrivacyPool is
     /// @param commitment The single commitment to reference in the future
     /// @return leafIndex The location in the tree where the commitment was stored
     function deposit(bytes32 commitment) external payable nonReentrant returns(uint256) {
-        return _deposit(msg.value, commitment);
+        _requireTokenTranches(1);
+        return _insertCommitment(commitment);
     }
 
-    function _deposit(uint256 value, bytes32 commitment) internal returns (uint256) {
+    function _insertCommitment(bytes32 commitment) internal returns (uint256) {
         if (commitments[commitment]) {
             revert PrivacyPool__CommitmentAlreadyUsed();
         }
@@ -120,16 +121,21 @@ contract PrivacyPool is
             denomination,
             leafIndex
         );
+        return leafIndex;
+    }
 
+    function _requireTokenTranches(uint256 count) internal {
         if (asset == NATIVE) {
-            if (value != denomination) revert PrivacyPool__MsgValueInvalid();
-        } else {
-            if (value != 0) {
+            uint256 value = msg.value;
+            if ((value != (value / count) * count) || (value / count != denomination)) {
                 revert PrivacyPool__MsgValueInvalid();
             }
-            IERC20(asset).safeTransferFrom(msg.sender, address(this), denomination);
+        } else {
+            if (msg.value != 0) {
+                revert PrivacyPool__MsgValueInvalid();
+            }
+            IERC20(asset).safeTransferFrom(msg.sender, address(this), denomination * count);
         }
-        return leafIndex;
     }
 
     /// @notice Allows the caller to deposit multiple times into the contract
@@ -142,13 +148,14 @@ contract PrivacyPool is
     function depositMany(
         bytes32[] calldata inputs
     ) external payable nonReentrant returns(uint256[] memory leafIndices) {
-        uint256 value = msg.value / inputs.length;
-        leafIndices = new uint256[](inputs.length);
+        uint256 len = inputs.length;
+        leafIndices = new uint256[](len);
         uint256 i;
+        _requireTokenTranches(len);
         do {
-            leafIndices[i] = _deposit(value, inputs[i]);
+            leafIndices[i] = _insertCommitment(inputs[i]);
             unchecked { ++i; }
-        } while(i < inputs.length);
+        } while(i < len);
         return leafIndices;
     }
 

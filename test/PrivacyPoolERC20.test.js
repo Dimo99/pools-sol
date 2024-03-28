@@ -202,9 +202,10 @@ describe('PrivacyPool.sol ERC20 token deposits', function () {
                 1,
                 2n ** 20n, // 1048576
             );
+            await asset.connect(signers[0]).approve(privacyPool.address, denomination);
             await expect(
                 privacyPool.deposit(padLeftHash('0x1234'), {
-                    value: 1n,
+                    value: 0n,
                 })
             ).to.be.revertedWithCustomError(
                 privacyPool,

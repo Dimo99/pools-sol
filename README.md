@@ -81,3 +81,11 @@ $ ./venv/bin/slither --hardhat-cache-directory=./build/cache --hardhat-artifacts
 ```bash
 HARDHAT_NODE_LOGGING_ENABLED=1 # have the hardhat node print out rpc request info
 ```
+
+### tooling
+
+[circomspect](https://github.com/trailofbits/circomspect) is very easy to install
+
+```
+cargo install circomspect
+```

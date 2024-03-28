@@ -19,6 +19,8 @@
         "cloc:default": "cloc --by-file --out=./cloc.md ./contracts/*.sol",
         "clean": "rm -rf out contracts/verifiers/withdraw_* circuits/out/*",
         "build": "yarn run clean && ./scripts/setup.sh && hardhat compile",
+        "circomspect": "run-script-os",
+        "circomspect:default": "circomspect circuits/exclusion_proof.circom",
         "coverage": "run-script-os",
         "coverage:default": "NODE_OPTIONS=\"--max_old_space_size=8192\" npx hardhat coverage",
         "coverage-export": "run-script-os",

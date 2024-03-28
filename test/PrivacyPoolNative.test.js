@@ -155,7 +155,7 @@ describe('PrivacyPool.sol Native token deposits', function () {
             );
             await expect(
                 privacyPool.deposit(padLeftHash('0x1234'), {
-                    value: 1n,
+                    value: await privacyPool.denomination(),
                 })
             ).to.be.revertedWithCustomError(
                 privacyPool,

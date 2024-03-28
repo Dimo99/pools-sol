@@ -17,7 +17,7 @@ contract PrivacyPoolFactory is ReentrancyGuard {
 
     address constant public NATIVE = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
     uint256 constant public MAX_TREE_LIMIT = 1048576;
-    address public poseidon;
+    address public immutable poseidon;
 
     // All existing pools grouped by asset and power (10**x).
     // asset => power => pools[]
