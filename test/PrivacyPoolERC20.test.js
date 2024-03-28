@@ -100,6 +100,16 @@ describe('PrivacyPool.sol ERC20 token deposits', function () {
                 value: 1,
             })).to.be.revertedWithCustomError(privacyPool, 'PrivacyPool__MsgValueInvalid')
         })
+        it('fails if commitment is used twice', async () => {
+            const index = 0
+            const signer = signers[index];
+            await expect(asset.connect(signer).approve(privacyPool.address, ethers.constants.MaxUint256))
+                .to.emit(asset, 'Approval')
+            await expect(privacyPool.connect(signer).deposit(padLeftHash(rawCommitments[index])))
+                .to.emit(privacyPool, 'Deposit')
+            await expect(privacyPool.connect(signer).deposit(padLeftHash(rawCommitments[index])))
+                .to.be.revertedWithCustomError(privacyPool, 'PrivacyPool__CommitmentAlreadyUsed')
+        })
 
 
         it('anyone can deposit', async () => {

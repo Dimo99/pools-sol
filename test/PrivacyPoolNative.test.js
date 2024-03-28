@@ -395,7 +395,7 @@ describe('PrivacyPool.sol Native token deposits', function () {
                 );
             }).timeout(WITHDRAWALS_TIMEOUT);
 
-            it("should prevent reentrancy attack`", async () => {
+            it("should prevent reentrancy attack", async () => {
                 // testing: recipient reentrancy attack
                 // testing: feeReceiver reentrancy attack
                 const reentrancyAttacker = await deploy("ReentrancyAttacker", []);
@@ -417,7 +417,7 @@ describe('PrivacyPool.sol Native token deposits', function () {
                         },
                             { value: withdrawData.proof.refund }
                         )
-                    ).to.be.revertedWith('Address: unable to send value, recipient may have reverted');
+                    ).to.be.revertedWithCustomError(privacyPool, 'FailedInnerCall')
                 }
             }).timeout(WITHDRAWALS_TIMEOUT);
 

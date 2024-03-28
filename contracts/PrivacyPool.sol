@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.17;
+pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { Address } from "@openzeppelin/contracts/utils/Address.sol";
 import "./IncrementalMerkleTree.sol";
 import "./verifiers/withdraw_from_subset_verifier.sol";
@@ -64,6 +64,7 @@ contract PrivacyPool is
     error PrivacyPool__FeeExceedsDenomination();
     error PrivacyPool__InvalidZKProof();
     error PrivacyPool__MsgValueInvalid();
+    error PrivacyPool__CommitmentAlreadyUsed();
     error PrivacyPool__NoteAlreadySpent();
     error PrivacyPool__UnknownRoot();
     error PrivacyPool__ZeroAddress();
@@ -74,8 +75,10 @@ contract PrivacyPool is
     address public immutable asset;
     // denomination of deposits and withdrawals for this pool
     uint256 public immutable denomination;
+    bytes32 public immutable assetMetadata;
     // double spend records
     mapping(bytes32 => bool) public nullifiers;
+    mapping(bytes32 => bool) public commitments;
 
     constructor(address poseidon, address _asset, uint256 _denomination) ReentrancyGuard() IncrementalMerkleTree(poseidon) {
         if (poseidon == address(0)) {
@@ -89,6 +92,7 @@ contract PrivacyPool is
             revert PrivacyPool__DenominationInvalid();
         }
         denomination = _denomination;
+        assetMetadata = bytes32(abi.encodePacked(asset, denomination).snarkHash());
     }
 
     /// @notice Deposits a single commitment ensuring its validity
@@ -102,7 +106,10 @@ contract PrivacyPool is
     }
 
     function _deposit(uint256 value, bytes32 commitment) internal returns (uint256) {
-        bytes32 assetMetadata = bytes32(abi.encodePacked(asset, denomination).snarkHash());
+        if (commitments[commitment]) {
+            revert PrivacyPool__CommitmentAlreadyUsed();
+        }
+        commitments[commitment] = true;
         bytes32 leaf = hasher.poseidon([commitment, assetMetadata]);
         uint256 leafIndex = insert(leaf);
 
@@ -130,18 +137,18 @@ contract PrivacyPool is
     /// It enforces particular value denominations to ensure correctness of deposits
     /// For native tokens, the total value sent must equal the denomination multiplied by the number of commitments
     /// For ERC20 tokens, the value must be zero
-    /// @param commitments An array of commitments to be passed into _deposit
+    /// @param inputs An array of commitments to be passed into _deposit
     /// @return leafIndices A set of leaf indices, with the same length as the commitments
     function depositMany(
-        bytes32[] calldata commitments
+        bytes32[] calldata inputs
     ) external payable nonReentrant returns(uint256[] memory leafIndices) {
-        uint256 value = msg.value / commitments.length;
-        leafIndices = new uint256[](commitments.length);
+        uint256 value = msg.value / inputs.length;
+        leafIndices = new uint256[](inputs.length);
         uint256 i;
         do {
-            leafIndices[i] = _deposit(value, commitments[i]);
+            leafIndices[i] = _deposit(value, inputs[i]);
             unchecked { ++i; }
-        } while(i < commitments.length);
+        } while(i < inputs.length);
         return leafIndices;
     }
 
@@ -155,7 +162,6 @@ contract PrivacyPool is
         if (proof.recipient == address(0)) {
             revert PrivacyPool__ZeroAddress();
         }
-        uint256 assetMetadata = abi.encodePacked(asset, denomination).snarkHash();
         uint256 withdrawMetadata = abi
             .encodePacked(
                 proof.recipient,
@@ -173,7 +179,7 @@ contract PrivacyPool is
                 uint256(proof.root),
                 uint256(proof.subsetRoot),
                 uint256(proof.nullifier),
-                assetMetadata,
+                uint256(assetMetadata),
                 withdrawMetadata
             )
         ) revert PrivacyPool__InvalidZKProof();
